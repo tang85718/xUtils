@@ -36,6 +36,9 @@ public class Selector {
 	protected int limit = 0;
 	protected int offset = 0;
 
+	protected Selector() {
+	}
+
 	private Selector(Class<?> entityType) {
 		this.entityType = entityType;
 		this.tableName = TableUtils.getTableName(entityType);
@@ -140,11 +143,23 @@ public class Selector {
 		StringBuilder result = new StringBuilder();
 		result.append("SELECT ");
 		result.append("*");
+
+		buildFrom(result);
+		buildGroupBy(result);
+		buildOrderBy(result);
+		buildLimit(result);
+
+		return result.toString();
+	}
+
+	protected void buildFrom(StringBuilder result) {
 		result.append(" FROM ").append(tableName);
 		if (whereBuilder != null && whereBuilder.getWhereItemSize() > 0) {
 			result.append(" WHERE ").append(whereBuilder.toString());
 		}
+	}
 
+	protected void buildGroupBy(StringBuilder result) {
 		if (groupByList != null) {
 			result.append(" GROUP BY ");
 			for (int i = 0; i < groupByList.size(); i++) {
@@ -152,7 +167,9 @@ public class Selector {
 			}
 			result.deleteCharAt(result.length() - 1);
 		}
+	}
 
+	protected void buildOrderBy(StringBuilder result) {
 		if (orderByList != null) {
 			result.append(" ORDER BY ");
 			for (int i = 0; i < orderByList.size(); i++) {
@@ -160,11 +177,13 @@ public class Selector {
 			}
 			result.deleteCharAt(result.length() - 1);
 		}
+	}
+
+	protected void buildLimit(StringBuilder result) {
 		if (limit > 0) {
 			result.append(" LIMIT ").append(limit);
 			result.append(" OFFSET ").append(offset);
 		}
-		return result.toString();
 	}
 
 	public Class<?> getEntityType() {
